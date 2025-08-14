@@ -1,0 +1,114 @@
+body {
+    margin: 0;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: #faf9f6; /* tom pastel claro */
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Fundo com formas geométricas */
+body::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 300px;
+    height: 300px;
+    background: rgba(173, 216, 230, 0.3); /* azul pastel */
+    border-radius: 50%;
+    z-index: -1;
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 182, 193, 0.3); /* rosa pastel */
+    border-radius: 50%;
+    z-index: -1;
+}
+
+/* Cabeçalho */
+.topo {
+    background: linear-gradient(90deg, #b5e0d3, #f7d6bf); /* verde-água e pêssego claros */
+    color: #333;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+/* Conteúdo */
+.conteudo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Personagem */
+.personagem {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.leo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Botões */
+.botoes {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 1.3em;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: bold;
+}
+
+.btn.grande {
+    background: #a6dcef; /* azul bebê */
+    color: #333;
+    padding: 15px 30px;
+}
+
+.btn.pequeno {
+    background: #fdd7aa; /* pêssego claro */
+    color: #333;
+    padding: 10px 20px;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Rodapé */
+.rodape {
+    background: #b5e0d3; /* verde-água pastel */
+    color: #333;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.9em;
+}
