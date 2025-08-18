@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Colorido e Limpo</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f7f7f7;
+        display: flex;
+    }
+
+    /* SIDEBAR RETRÁTIL SUPER FINO */
+    .sidebar {
+        width: 10px;
+        background-color: #ffb347;
+        transition: width 0.4s ease;
+        overflow: hidden;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        z-index: 100;
+    }
+    .sidebar:hover {
+        width: 200px;
+    }
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .sidebar ul li {
+        padding: 15px;
+        cursor: pointer;
+        white-space: nowrap;
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.3s, transform 0.3s;
+    }
+    .sidebar ul li:hover {
+        background-color: #ff9f1c;
+        transform: translateX(5px);
+    }
+    .icon {
+        font-size: 20px;
+        transition: transform 0.3s ease;
+    }
+    .sidebar:hover .icon {
+        transform: rotate(10deg) scale(1.2);
+    }
+
+    /* ÁREA PRINCIPAL */
+    .main {
+        margin-left: 10px;
+        padding: 20px;
+        flex: 1;
+        transition: margin-left 0.4s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* centraliza todo o conteúdo */
+    }
+    .sidebar:hover ~ .main {
+        margin-left: 200px;
+    }
+
+    /* GRUPOS DE CARDS */
+    .group {
+        margin-bottom: 40px;
+        background: transparent;
+        border-radius: 10px;
+        box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        width: fit-content; /* tamanho só o necessário */
+    }
+    .group-title {
+        color: #fff;
+        padding: 10px;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: center;
+    }
+    
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 130px); /* tamanho menor */
+        gap: 15px;
+        justify-content: center;
+        padding: 20px;
+    }
+    .card {
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.9em;
+        font-weight: bold;
+        box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+        aspect-ratio: 1 / 1; /* QUADRADO */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+    }
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    /* CORES DOS CARDS */
+    .c1 { background-color: #ffadad; }
+    .c2 { background-color: #ffd6a5; }
+    .c3 { background-color: #fdffb6; }
+    .c4 { background-color: #caffbf; }
+    .c5 { background-color: #9bf6ff; }
+    .c6 { background-color: #a0c4ff; }
+    .c7 { background-color: #bdb2ff; }
+    .c8 { background-color: #ffc6ff; }
+    .c9 { background-color: #fffffc; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <ul>
+        <li><span class="icon"></span> Início</li>
+        <li><span class="icon"></span> Sobre</li>
+        <li><span class="icon"></span> Contato</li>
+        <li><span class="icon">⚙️</span> Configurações</li>
+    </ul>
+</div>
+
+<!-- ÁREA PRINCIPAL -->
+<div class="main">
+    <h1>Bem-vindo!</h1>
+    <p>Site com grupos de 9 cards (3x3).</p>
+
+    <!-- GRUPO 1 -->
+    <div class="group">
+        <div class="group-title g1-title">Grupo 1</div>
+        <div class="cards">
+            <div class="card c1">1</div>
+            <div class="card c2">2</div>
+            <div class="card c3">3</div>
+            <div class="card c4">4</div>
+            <div class="card c5">5</div>
+            <div class="card c6">6</div>
+            <div class="card c7">7</div>
+            <div class="card c8">8</div>
+            <div class="card c9">9</div>
+        </div>
+    </div>
+
+    <!-- GRUPO 2 -->
+    <div class="group">
+        <div class="group-title g2-title">Grupo 2</div>
+        <div class="cards">
+            <div class="card c3">10</div>
+            <div class="card c4">11</div>
+            <div class="card c5">12</div>
+            <div class="card c6">13</div>
+            <div class="card c7">14</div>
+            <div class="card c8">15</div>
+            <div class="card c9">16</div>
+            <div class="card c1">17</div>
+            <div class="card c2">18</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
