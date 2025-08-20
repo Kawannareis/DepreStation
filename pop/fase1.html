@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase 1 - Conhecendo as Letras</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #fefefe;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  h1 { color: #333; z-index: 1; }
+
+  .alphabet {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    gap: 15px;
+    margin-top: 20px;
+    z-index: 1;
+    position: relative;
+  }
+
+  .letter {
+    width: 60px;
+    height: 60px;
+    background-color: #6ec1e4;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    user-select: none;
+  }
+
+  .letter:hover { transform: scale(1.1); }
+  .letter.active { background-color: #ffa656; }
+
+  /* Overlay */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+  }
+
+  /* Gradiente animado */
+  .gradient-bg {
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+    background-size: 400% 400%;
+    animation: gradient 8s ease infinite;
+    z-index: 0;
+  }
+
+  @keyframes gradient {
+    0% {background-position:0% 50%;}
+    50% {background-position:100% 50%;}
+    100% {background-position:0% 50%;}
+  }
+
+  .overlay h2 {
+    font-size: 48px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+    z-index: 2;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+  }
+
+  /* Estrelas caindo */
+  .star {
+    position: absolute;
+    font-size: 24px;
+    color: gold;
+    animation: fall 2s ease-out forwards;
+    z-index: 2;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(600px) rotate(720deg); opacity: 0; }
+  }
+
+  /* Partículas flutuantes */
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.7);
+    animation: float 5s infinite;
+    z-index: 1;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px) translateX(0px);}
+    50% { transform: translateY(-80px) translateX(20px);}
+    100% { transform: translateY(0px) translateX(0px);}
+  }
+</style>
+</head>
+<body>
+
+<h1>Fase 1 - Conhecendo as Letras</h1>
+<div class="alphabet" id="alphabet"></div>
+
+<!-- Overlay para fase concluída -->
+<div class="overlay" id="overlay">
+  <div class="gradient-bg"></div>
+  <h2>🎉 Fase Concluída! 🎉</h2>
+</div>
+
+<script>
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const alphabetDiv = document.getElementById('alphabet');
+const overlay = document.getElementById('overlay');
+let clickedCount = 0;
+
+// Sons das letras locais
+const sounds = {};
+letters.forEach(letter => {
+  sounds[letter] = `sons/${letter}.mp3`;
+});
+
+letters.forEach(letter => {
+  const btn = document.createElement('div');
+  btn.classList.add('letter');
+  btn.textContent = letter;
+
+  btn.addEventListener('click', () => {
+    if (!btn.classList.contains('active')) {
+      btn.classList.add('active');
+      clickedCount++;
+
+      const audio = new Audio(sounds[letter]);
+      audio.play();
+
+      if (clickedCount === letters.length) {
+        showCompletion();
+      }
+    }
+  });
+
+  alphabetDiv.appendChild(btn);
+});
+
+function showCompletion() {
+  overlay.style.display = 'flex';
+
+  // Som de comemoração
+  const cheer = new Audio('https://www.soundjay.com/human/applause-01.mp3');
+  cheer.play();
+
+  // Estrelas caindo
+  launchStars(30);
+
+  // Partículas flutuantes
+  launchParticles(50);
+
+  // Volta para tela inicial após 3s
+  setTimeout(() => { window.location.href = 'index.html'; }, 4000);
+}
+
+function launchStars(num) {
+  for (let i=0;i<num;i++){
+    const star=document.createElement('div');
+    star.classList.add('star');
+    star.textContent='⭐';
+    star.style.left=Math.random()*window.innerWidth+'px';
+    star.style.fontSize=(15+Math.random()*20)+'px';
+    overlay.appendChild(star);
+    setTimeout(()=>star.remove(),2000);
+  }
+}
+
+function launchParticles(num){
+  for(let i=0;i<num;i++){
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    p.style.left = Math.random()*window.innerWidth+'px';
+    p.style.top = Math.random()*window.innerHeight+'px';
+    overlay.appendChild(p);
+    setTimeout(()=>p.remove(),5000);
+  }
+}
+</script>
+</body>
+</html>
