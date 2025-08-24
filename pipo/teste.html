@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Froggy Animation</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0d1321;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      width: 640px;
+      height: 320px;
+      image-rendering: pixelated;
+      border: 2px solid #4caf50;
+      background: #1a2238;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="320" height="160"></canvas>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    // Froggy spritesheet
+    const sprite = new Image();
+    sprite.src = "./frog_spritesheet.png"; // coloque aqui o caminho do Froggy baixado
+
+    const frameW = 64;
+    const frameH = 32;
+
+    // Linhas: 0 = idle(4 frames), 1 = hop(7 frames), 2 = hurt(2 frames), 3 = attack(4 frames)
+    const animations = {
+      idle: { row: 0, frames: 4, fps: 6 },
+      hop: { row: 1, frames: 7, fps: 10 },
+      hurt: { row: 2, frames: 2, fps: 6 },
+      attack: { row: 3, frames: 4, fps: 8 }
+    };
+
+    let currentAnim = animations.idle;
+    let frame = 0;
+    let elapsed = 0;
+
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: 0,
+      vy: 0,
+      speed: 60,
+      facing: 1
+    };
+
+    const keys = new Set();
+    window.addEventListener('keydown', e => keys.add(e.key));
+    window.addEventListener('keyup', e => keys.delete(e.key));
+
+    let last = performance.now();
+    function loop(now) {
+      const dt = (now - last) / 1000;
+      last = now;
+
+      update(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+      let moving = false;
+
+      if (keys.has('ArrowLeft') || keys.has('a')) {
+        player.vx = -player.speed;
+        player.facing = -1;
+        moving = true;
+      } else if (keys.has('ArrowRight') || keys.has('d')) {
+        player.vx = player.speed;
+        player.facing = 1;
+        moving = true;
+      } else player.vx = 0;
+
+      if (keys.has('ArrowUp') || keys.has('w')) {
+        player.vy = -player.speed;
+        moving = true;
+      } else if (keys.has('ArrowDown') || keys.has('s')) {
+        player.vy = player.speed;
+        moving = true;
+      } else if (!moving) player.vy = 0;
+
+      // Seleção de animações por teclas
+      if (keys.has(' ')) {
+        currentAnim = animations.attack;
+      } else if (keys.has('Shift')) {
+        currentAnim = animations.hurt;
+      } else if (moving) {
+        currentAnim = animations.hop;
+      } else {
+        currentAnim = animations.idle;
+      }
+
+      player.x += player.vx * dt;
+      player.y += player.vy * dt;
+
+      player.x = Math.max(frameW/2, Math.min(canvas.width - frameW/2, player.x));
+      player.y = Math.max(frameH/2, Math.min(canvas.height - frameH/2, player.y));
+
+      // animação
+      const animSpeed = 1 / currentAnim.fps;
+      elapsed += dt;
+      if (elapsed >= animSpeed) {
+        frame = (frame + 1) % currentAnim.frames;
+        elapsed = 0;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const sx = frame * frameW;
+      const sy = currentAnim.row * frameH;
+      const dx = Math.round(player.x - frameW/2);
+      const dy = Math.round(player.y - frameH/2);
+
+      if (player.facing === -1) {
+        ctx.save();
+        ctx.translate(dx + frameW/2, dy + frameH/2);
+        ctx.scale(-1, 1);
+        ctx.drawImage(sprite, sx, sy, frameW, frameH, -frameW/2, -frameH/2, frameW, frameH);
+        ctx.restore();
+      } else {
+        ctx.drawImage(sprite, sx, sy, frameW, frameH, dx, dy, frameW, frameH);
+      }
+    }
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
