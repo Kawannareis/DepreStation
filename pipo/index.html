@@ -1,135 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Seleção de Personagem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu do Jogo</title>
   <style>
     body {
-      color: #222;
-      font-family: 'Press Start 2P', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
+      font-family: 'Press Start 2P', sans-serif, Arial, sans-serif;
+      background: #0b0c10;
+      color: #fff;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      text-align: center;
       overflow: hidden;
-      user-select: none;
-      background: #000;
     }
 
-    header {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      padding: 10px 20px;
-      position: relative;
-      z-index: 2;
-    }
-
-    header button {
-      font-size: 20px;
-      padding: 5px 10px;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-      background-color: #219ebc;
-      color: #fff;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-
-    header button:hover {
-      background-color: #023047;
-      transform: scale(1.1);
-    }
-
-    h1 {
-      margin-bottom: 30px;
-      color: #fff;
-      text-shadow: 2px 2px #219ebc;
-      text-align: center;
-    }
-
-    .menu-navegacao {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      z-index: 1;
-      position: relative;
-    }
-
-    .menu-navegacao button {
-      font-size: 40px;
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      transition: transform 0.2s, color 0.2s;
-    }
-
-    .menu-navegacao button:hover {
-      transform: scale(1.3);
-      color: #ffb703;
-    }
-
-    .personagens {
-      display: flex;
-      gap: 20px;
-    }
-
-    .card {
-      background: rgba(0,0,0,0.5);
-      border: 2px solid #555;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      width: 140px;
-      border-radius: 8px;
-      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-      position: relative;
-    }
-
-    .card.highlighted {
-      border-color: #fff;
-      box-shadow: 0 0 15px #fff;
-      animation: pulse 1s infinite alternate;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1.15); }
-      100% { transform: scale(1.2); }
-    }
-
-    canvas {
-      display: block;
-      margin: 0 auto 5px auto;
-      image-rendering: pixelated;
-      background: transparent;
-      border: 1px solid #555;
-    }
-
-    button#play {
-      margin-top: 30px;
-      padding: 15px 30px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background-color: #ffb703;
-      color: #000;
-      transition: background-color 0.2s, transform 0.2s;
-      z-index: 1;
-      position: relative;
-    }
-
-    button#play:hover {
-      background-color: #fb8500;
-      transform: scale(1.1);
-    }
-
-   
+    /* Video de fundo */
     #fundoVideo {
       position: fixed;
       top: 0;
@@ -139,182 +25,155 @@
       object-fit: cover;
       z-index: -1;
     }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header button {
+      background: #45a29e;
+      border: 2px solid #66fcf1;
+      border-radius: 10px;
+      color: #0b0c10;
+      padding: 10px 14px;
+      margin: 0 5px;
+      font-size: 14px;
+      cursor: default;
+      box-shadow: 0 4px #66fcf1;
+      transition: all 0.2s ease-in-out;
+    }
+
+    header button:hover {
+      transform: translateY(-2px) scale(1.1);
+      box-shadow: 0 6px #45a29e;
+      background: #66fcf1;
+      color: #0b0c10;
+    }
+
+    #fasesContainer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      justify-items: center;
+      max-width: 400px;
+      margin: 20px auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fase {
+      width: 120px;
+      height: 120px;
+      background: #1c1c1c;
+      border: 2px solid #45a29e;
+      border-radius: 12px;
+      padding: 10px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .fase:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #66fcf1;
+      border-color: #66fcf1;
+    }
+
+    .fase.locked {
+      background: #333;
+      border-color: #555;
+      box-shadow: none;
+    }
+
+    .fase h2 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+    }
+
+    .stars {
+      display: flex;
+      gap: 5px;
+    }
+
+    .star {
+      font-size: 18px;
+      color: #555;
+    }
+
+    .lock {
+      font-size: 40px;
+      color: #ff0000;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 <body>
-
- 
-  <header>
-    <button id="Ajuda">❓</button>
-    <button id="toggleMusica">🔊 Música</button>
-  </header>
-
-
-  <audio id="musicaFundo" src="8bit-music-for-game-68698.mp3" autoplay loop></audio>
-
-
 
   <video autoplay muted loop id="fundoVideo">
     <source src="./Design sem nome.mp4" type="video/mp4">
   </video>
 
-  <h1>Escolha seu personagem</h1>
+  <audio id="musicaFundo" src="8bit-music-for-game-68698.mp3" autoplay loop></audio>
 
-  <div class="menu-navegacao">
-    <button id="esquerda">⬅</button>
-    <div class="personagens">
-      <div class="card" data-personagem="kitty">
-        <canvas width="128" height="128"></canvas>
-        <div>Kitty</div>
-      </div>
-      <div class="card" data-personagem="piggy">
-        <canvas width="128" height="128"></canvas>
-        <div>Piggy</div>
-      </div>
-      <div class="card" data-personagem="ducky">
-        <canvas width="128" height="128"></canvas>
-        <div>Ducky</div>
-      </div>
-      <div class="card" data-personagem="blob">
-        <canvas width="128" height="128"></canvas>
-        <div>Blob</div>
-      </div>
+  <header>
+    <div>
+      <button>🔊</button>
+      <button>❓</button>
     </div>
-    <button id="direita">➡</button>
-  </div>
+    <div>
+      <button>⭐ 0</button>
+      <button>👤</button>
+    </div>
+  </header>
 
-  <button id="play">Jogar</button>
-
-  <audio id="som-hover" src="blip.mp3"></audio>
+  <div id="fasesContainer"></div>
 
   <script>
+    const fases = [
+      { id: 1, locked: false },
+      { id: 2, locked: false },
+      { id: 3, locked: false },
+      { id: 4, locked: false },
+      { id: 5, locked: false },
+      { id: 6, locked: false },
+      { id: 7, locked: true },
+      { id: 8, locked: true },
+      { id: 9, locked: true }
+    ];
+
+    function renderFases() {
+      const container = document.getElementById("fasesContainer");
+      container.innerHTML = "";
+
+      fases.forEach(fase => {
+        const div = document.createElement("div");
+        div.className = "fase" + (fase.locked ? " locked" : "");
+        div.innerHTML = `
+          <h2>Fase ${fase.id}</h2>
+          <div class="stars">
+            ${[...Array(3)].map(_ => `<span class="star">★</span>`).join("")}
+          </div>
+          ${fase.locked ? '<div class="lock">🔒</div>' : ""}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    renderFases();
     const musica = document.getElementById('musicaFundo');
     musica.volume = 0.3;
-
-    document.body.addEventListener('click', () => {
-      musica.play();
-    }, { once: true });
-
-    const personagensConfig = {
-      kitty: { src: 'Kitty.png', frameWidth: 32, frameHeight: 32, frames: 8 },
-      piggy: { src: 'piggy.png', frameWidth: 32, frameHeight: 32, frames: 5 },
-      ducky: { src: 'ducky.png', frameWidth: 32, frameHeight: 32, frames: 2 },
-      blob: { src: 'blob.png', frameWidth: 32, frameHeight: 32, frames: 2 }
-    };
-
-    let selecionado = null;
-    const cards = document.querySelectorAll('.card');
-    const somHover = document.getElementById('som-hover');
-
-    function selecionarCard(card) {
-      if(selecionado) selecionado.classList.remove('highlighted');
-      selecionado = card;
-      selecionado.classList.add('highlighted');
-      localStorage.setItem('personagemSelecionado', card.getAttribute('data-personagem'));
-    }
-
-    cards.forEach(card => {
-      const nome = card.getAttribute('data-personagem');
-      const canvas = card.querySelector('canvas');
-      const ctx = canvas.getContext('2d');
-      const config = personagensConfig[nome];
-      const sprite = new Image();
-      sprite.src = config.src;
-      let frame = 0;
-      const frameInterval = 200; 
-      let lastTime = 0;
-
-      sprite.onload = () => {
-        function loop(time) {
-          if (!lastTime) lastTime = time;
-          const delta = time - lastTime;
-
-          if (delta >= frameInterval) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const maxHeight = 96;
-            const scale = maxHeight / config.frameHeight;
-
-            const drawWidth = config.frameWidth * scale;
-            const drawHeight = config.frameHeight * scale;
-
-            const offsetX = (canvas.width - drawWidth) / 2;
-            const offsetY = (canvas.height - drawHeight) / 2;
-
-            ctx.drawImage(
-              sprite,
-              frame * config.frameWidth, 0,
-              config.frameWidth, config.frameHeight,
-              offsetX, offsetY,
-              drawWidth, drawHeight
-            );
-
-            frame = (frame + 1) % config.frames;
-            lastTime = time;
-          }
-          requestAnimationFrame(loop);
-        }
-        requestAnimationFrame(loop);
-      };
-
-      card.addEventListener('mouseenter', () => {
-        somHover.currentTime = 0;
-        somHover.play();
-      });
-
-      card.addEventListener('click', () => selecionarCard(card));
-    });
-
-    const esquerda = document.getElementById('esquerda');
-    const direita = document.getElementById('direita');
-    let indexSelecionado = 0;
-
-    function atualizarSelecao() {
-      cards.forEach(c => c.classList.remove('highlighted'));
-      indexSelecionado = (indexSelecionado + cards.length) % cards.length;
-      selecionarCard(cards[indexSelecionado]);
-    }
-
-    esquerda.addEventListener('click', () => {
-      indexSelecionado--;
-      atualizarSelecao();
-    });
-
-    direita.addEventListener('click', () => {
-      indexSelecionado++;
-      atualizarSelecao();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') {
-        indexSelecionado--;
-        atualizarSelecao();
-      } else if (e.key === 'ArrowRight') {
-        indexSelecionado++;
-        atualizarSelecao();
-      }
-    });
-
-    document.getElementById('play').addEventListener('click', () => {
-      if(localStorage.getItem('personagemSelecionado')) {
-        window.location.href = 'game.html';
-      } else {
-        alert('Escolha um personagem primeiro!');
-      }
-    });
-
-    const btnMusica = document.getElementById('toggleMusica');
-    btnMusica.addEventListener('click', () => {
-      if(musica.paused) {
-        musica.play();
-        btnMusica.textContent = "🔊 Música";
-      } else {
-        musica.pause();
-        btnMusica.textContent = "🔇 Música";
-      }
-    });
-
-    selecionarCard(cards[0]);
   </script>
 </body>
 </html>
