@@ -82,16 +82,13 @@
 
   <script>
 
-    // === BACK-END ===
-    // Alan aqui vai ter a função de buscar o nome do usuário logado no banco de dados, quando fizer o banco vai ser mais facil pra incuirsx
-    // Opinião do chat para ajudar : fetch('/api/user/me').then(r => r.json()).then(user => { nomeUsuario.textContent = user.nome });
+  
 
     let modoCadastro = false;
     const btnAction = document.getElementById("btnAction");
     const switchMode = document.getElementById("switchMode");
     const titulo = document.getElementById("titulo");
 
-    // Usuários simulados (vai para banco depois)
     const usuarios = [];
 
     switchMode.addEventListener("click", () => {
