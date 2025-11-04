@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase 3 - Complete a Palavra</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Press Start 2P', sans-serif;
+    background-color: #000000;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #ffffff;
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .emoji {
+    font-size: 70px;
+    margin-bottom: 10px;
+  }
+
+  #word {
+    font-size: 20px;
+    color: #ffffff;
+    margin-bottom: 20px;
+  }
+
+  .options {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .option {
+    background-color: #8d8d8d;
+    border: 2px solid #000000;
+    border-radius: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .option:hover {
+    transform: scale(1.1);
+    background-color: #faedcd;
+  }
+
+  #message {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #283618;
+    min-height: 20px;
+  }
+
+  #nextButton {
+    display: none;
+    background-color: #606c38;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Press Start 2P';
+    font-size: 12px;
+    margin-top: 20px;
+  }
+
+  #nextButton:hover {
+    background-color: #283618;
+  }
+</style>
+</head>
+<body>
+
+<h1>Complete a Palavra!</h1>
+<div class="emoji" id="emoji"></div>
+<div id="word"></div>
+<div class="options" id="options"></div>
+<div id="message"></div>
+<button id="nextButton" onclick="nextWord()">Próxima Palavra</button>
+
+<script>
+  const palavras = [
+    { emoji: "🍌", incompleta: "BA_ANA", correta: "N", opcoes: ["M", "N", "L"] },
+    { emoji: "🐱", incompleta: "GA_ O", correta: "T", opcoes: ["C", "R", "T"] },
+    { emoji: "🚗", incompleta: "CA_ O", correta: "R", opcoes: ["N", "R", "L"] },
+    { emoji: "🦋", incompleta: "BO_ ETA", correta: "R", opcoes: ["R", "N", "S"] },
+    { emoji: "🍎", incompleta: "MA_ Ã", correta: "Ç", opcoes: ["S", "C", "Ç"] }
+  ];
+
+  let indice = 0;
+
+  function carregarPalavra() {
+    const atual = palavras[indice];
+    document.getElementById("emoji").textContent = atual.emoji;
+    document.getElementById("word").textContent = atual.incompleta;
+    document.getElementById("message").textContent = "";
+    document.getElementById("nextButton").style.display = "none";
+
+    const container = document.getElementById("options");
+    container.innerHTML = "";
+
+    atual.opcoes.forEach(opcao => {
+      const div = document.createElement("div");
+      div.textContent = opcao;
+      div.className = "option";
+      div.onclick = () => verificarResposta(opcao);
+      container.appendChild(div);
+    });
+  }
+
+  function verificarResposta(opcao) {
+    const atual = palavras[indice];
+    const mensagem = document.getElementById("message");
+
+    if (opcao === atual.correta) {
+      document.getElementById("word").textContent = atual.incompleta.replace("_", atual.correta);
+      mensagem.textContent = "✅ Muito bem!";
+      document.getElementById("nextButton").style.display = "inline-block";
+    } else {
+      mensagem.textContent = "❌ Tente novamente!";
+    }
+  }
+
+  function nextWord() {
+    indice++;
+    if (indice < palavras.length) {
+      carregarPalavra();
+    } else {
+      document.body.innerHTML = `
+        <h1>🎉 Parabéns!</h1>
+        <p>Você completou todas as palavras!</p>
+        <button onclick="window.location.href='atv3.html'">Avançar para a próxima atividade ➡️</button>
+      `;
+    }
+  }
+
+  carregarPalavra();
+</script>
+
+</body>
+</html>

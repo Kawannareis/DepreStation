@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Cadastro</title>
+  <style>
+    body {
+      font-family: 'Press Start 2P', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0b0c10;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #loginBox {
+      background: rgba(31, 40, 51, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #66fcf1;
+      text-align: center;
+      width: 300px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #66fcf1;
+      font-size: 18px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 2px solid #66fcf1;
+      background: #45a29e;
+      color: #0b0c10;
+      cursor: pointer;
+      font-size: 12px;
+      box-shadow: 0 4px #66fcf1;
+      transition: all 0.2s ease-in-out;
+    }
+
+    button:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px #45a29e;
+      background: #66fcf1;
+      color: #0b0c10;
+    }
+
+    .switch {
+      margin-top: 12px;
+      font-size: 10px;
+      cursor: pointer;
+      color: #66fcf1;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginBox">
+    <h1 id="titulo">Login</h1>
+    <input type="text" id="username" placeholder="Nome de usuário">
+    <input type="password" id="password" placeholder="Senha">
+    <button id="btnAction">Entrar</button>
+    <div class="switch" id="switchMode">Não tem conta? Cadastre-se</div>
+  </div>
+
+<script>
+  let modoCadastro = false;
+  const btnAction = document.getElementById("btnAction");
+  const switchMode = document.getElementById("switchMode");
+  const titulo = document.getElementById("titulo");
+
+  // Troca entre Login e Cadastro
+  switchMode.addEventListener("click", () => {
+    modoCadastro = !modoCadastro;
+    if (modoCadastro) {
+      titulo.textContent = "Cadastro";
+      btnAction.textContent = "Cadastrar";
+      switchMode.textContent = "Já tem conta? Faça login";
+    } else {
+      titulo.textContent = "Login";
+      btnAction.textContent = "Entrar";
+      switchMode.textContent = "Não tem conta? Cadastre-se";
+    }
+  });
+
+  // Função principal de login/cadastro
+  btnAction.addEventListener("click", async () => {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+      alert("Preencha todos os campos!");
+      return;
+    }
+
+    // Altere aqui a porta caso mude no back-end (ex: 5000, 8080 etc)
+    const baseURL = "http://localhost:3000";
+
+    const endpoint = modoCadastro ? "/api/cadastro" : "/api/login";
+
+    try {
+      const res = await fetch(`${baseURL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Erro ao processar a requisição.");
+        return;
+      }
+
+      alert(data.message);
+
+      if (!modoCadastro) {
+        // Login bem-sucedido, redirecionar para o menu do jogo
+        window.location.href = "index.html";
+      } else {
+        // Após cadastro, voltar ao modo login
+        modoCadastro = false;
+        titulo.textContent = "Login";
+        btnAction.textContent = "Entrar";
+        switchMode.textContent = "Não tem conta? Cadastre-se";
+      }
+
+    } catch (err) {
+      console.error("Erro de conexão:", err);
+      alert("Erro na conexão com o servidor.");
+    }
+  });
+</script>
+  
+</body>
+</html>
