@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase 8 - Ligue a Imagem ao Nome 🧩</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    margin-top: 20px;
+    color: #ffcc00;
+  }
+
+  #tema {
+    font-size: 22px;
+    margin-top: 10px;
+    color: #ccc;
+  }
+
+  #container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 50px auto;
+    width: 90%;
+    max-width: 1200px;
+  }
+
+  #imagens, #nomes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 40%;
+  }
+
+  .imagem {
+    width: 150px;
+    height: 150px;
+    background-color: #111;
+    border-radius: 15px;
+    box-shadow: 0 0 10px #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .imagem img {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    object-fit: contain;
+  }
+
+  .nome {
+    background-color: #222;
+    border: 2px solid #555;
+    padding: 10px 25px;
+    border-radius: 10px;
+    cursor: grab;
+    font-size: 18px;
+    transition: background 0.3s, transform 0.2s;
+    user-select: none;
+  }
+
+  .nome:hover {
+    background-color: #333;
+    transform: scale(1.05);
+  }
+
+  .correto {
+    background-color: #4CAF50 !important;
+    color: white;
+  }
+
+  #mensagem {
+    margin-top: 30px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  #botao-menu {
+    margin-top: 25px;
+    padding: 10px 20px;
+    background-color: #ffcc00;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: none;
+  }
+
+  #botao-menu:hover {
+    background-color: #ffe066;
+  }
+
+  /* opcional: linha divisória no meio */
+  #linha-meio {
+    width: 2px;
+    height: 600px;
+    background-color: #333;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🧩 Ligue a imagem ao nome!</h1>
+<div id="tema"></div>
+
+<div id="container">
+  <div id="imagens"></div>
+  <div id="linha-meio"></div>
+  <div id="nomes"></div>
+</div>
+
+<div id="mensagem"></div>
+<button id="botao-menu" onclick="window.location.href='menu.html'">Voltar ao Menu</button>
+
+<audio id="som-acerto" src="acerto.mp3"></audio>
+
+<script>
+  const temas = [
+    {
+      nome: "Frutas 🍎",
+      itens: [
+        { nome: "Banana", imagem: "img/banana.jpg" },
+        { nome: "Maçã", imagem: "img/maca.jpg" },
+        { nome: "Uva", imagem: "img/uva.jpg" },
+        { nome: "Pera", imagem: "img/pera.jpg" }
+      ]
+    },
+    {
+      nome: "Animais 🐾",
+      itens: [
+        { nome: "Gato", imagem: "img/gato.jpg" },
+        { nome: "Cachorro", imagem: "img/cachorro.jpg" },
+        { nome: "Porco", imagem: "img/porco.jpg" },
+        { nome: "Elefante", imagem: "img/elefante.jpg" }
+      ]
+    },
+    {
+      nome: "Objetos 🧺",
+      itens: [
+        { nome: "Bola", imagem: "img/bola.jpg" },
+        { nome: "Lápis", imagem: "img/lapis.jpg" },
+        { nome: "Cadeira", imagem: "img/cadeira.jpg" },
+        { nome: "Relógio", imagem: "img/relogio.jpg" }
+      ]
+    }
+  ];
+
+  let temaAtual = 0;
+  let acertos = 0;
+
+  const divImagens = document.getElementById("imagens");
+  const divNomes = document.getElementById("nomes");
+  const mensagem = document.getElementById("mensagem");
+  const temaTitulo = document.getElementById("tema");
+  const somAcerto = document.getElementById("som-acerto");
+  const botaoMenu = document.getElementById("botao-menu");
+
+  function carregarTema() {
+    divImagens.innerHTML = "";
+    divNomes.innerHTML = "";
+    mensagem.textContent = "";
+    acertos = 0;
+    const tema = temas[temaAtual];
+    temaTitulo.textContent = `Tema: ${tema.nome}`;
+
+    const nomesEmbaralhados = [...tema.itens].sort(() => Math.random() - 0.5);
+
+    // imagens
+    tema.itens.forEach(item => {
+      const divImg = document.createElement("div");
+      divImg.classList.add("imagem");
+      divImg.dataset.nome = item.nome.toLowerCase();
+      divImg.innerHTML = `<img src="${item.imagem}" alt="${item.nome}">`;
+
+      divImg.addEventListener("dragover", e => e.preventDefault());
+      divImg.addEventListener("drop", e => {
+        const nomeArrastado = e.dataTransfer.getData("nome");
+        if (nomeArrastado === divImg.dataset.nome) {
+          divImg.style.border = "3px solid #4CAF50";
+          const nomeEl = document.querySelector(`[data-nome='${nomeArrastado}']`);
+          nomeEl.classList.add("correto");
+          nomeEl.draggable = false;
+          somAcerto.play();
+          acertos++;
+          if (acertos === 4) setTimeout(proximoTema, 1000);
+        } else {
+          divImg.style.border = "3px solid red";
+          setTimeout(() => divImg.style.border = "", 600);
+        }
+      });
+
+      divImagens.appendChild(divImg);
+    });
+
+    // nomes
+    nomesEmbaralhados.forEach(item => {
+      const divNome = document.createElement("div");
+      divNome.classList.add("nome");
+      divNome.textContent = item.nome;
+      divNome.draggable = true;
+      divNome.dataset.nome = item.nome.toLowerCase();
+
+      divNome.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("nome", e.target.dataset.nome);
+      });
+
+      divNomes.appendChild(divNome);
+    });
+  }
+
+  function proximoTema() {
+    temaAtual++;
+    if (temaAtual < temas.length) {
+      mensagem.textContent = "✅ Muito bem! Próximo tema...";
+      setTimeout(carregarTema, 1500);
+    } else {
+      mensagem.textContent = "🎉 Parabéns! Você completou todos os temas!";
+      botaoMenu.style.display = "inline-block";
+    }
+  }
+
+  carregarTema();
+</script>
+</body>
+</html>

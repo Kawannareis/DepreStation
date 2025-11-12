@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fase 5 - Fale o Nome da Fruta 🍓</title>
+  <style>
+    body {
+      background-color: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      color: #5e17eb;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    img {
+      width: 250px;
+      height: 250px;
+      object-fit: contain;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      margin-top: 10px;
+      border: 3px solid #5e17eb;
+      background-color: #fff;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      min-height: 30px;
+    }
+
+    #score {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #5e17eb;
+    }
+
+    .botao {
+      background-color: #5e17eb;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s;
+    }
+
+    .botao:hover {
+      background-color: #7b2cbf;
+    }
+
+    #micButton {
+      background: none;
+      border: none;
+      margin-top: 25px;
+      cursor: pointer;
+      outline: none;
+      transition: transform 0.2s;
+    }
+
+    #micButton:hover {
+      transform: scale(1.1);
+    }
+
+    #micImage {
+      width: 90px;
+      height: 90px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      transition: 0.3s;
+    }
+
+    .recording #micImage {
+      filter: drop-shadow(0 0 15px red);
+      transform: scale(1.2);
+    }
+
+    #botoesExtras {
+      margin-top: 30px;
+      display: flex;
+      gap: 15px;
+    }
+
+    #pularInfo {
+      font-size: 16px;
+      color: #333;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 Fale o nome da fruta!</h1>
+  <img id="fruitImage" src="" alt="Fruta">
+  <div id="status">Clique no microfone e diga o nome da fruta 🍉</div>
+  <div id="score">Fruta 1 de 10</div>
+
+  <button id="micButton">
+    <img id="micImage" src="microfone.png" alt="Microfone">
+  </button>
+
+  <div id="botoesExtras">
+    <button class="botao" id="pular">⏭️ Pular fruta</button>
+    <button class="botao" id="menu">🏠 Voltar ao menu</button>
+  </div>
+  <div id="pularInfo">Pulos restantes: <span id="pulosRestantes">2</span></div>
+
+  <script>
+    const frutas = [
+      { nome: "banana", imagem: "img/banana.jpg" },
+      { nome: "uva", imagem: "img/uva.jpg" },
+      { nome: "maçã", imagem: "img/maca.jpg" },
+      { nome: "pera", imagem: "img/pera.jpg" },
+      { nome: "laranja", imagem: "img/laranja.jpg" },
+      { nome: "abacaxi", imagem: "img/abacaxi.jpg" },
+      { nome: "melancia", imagem: "img/melancia.jpg" },
+      { nome: "coco", imagem: "img/coco.jpg" },
+      { nome: "abacate", imagem: "img/abacate.jpg" },
+      { nome: "morango", imagem: "img/morango.jpg" }
+    ];
+
+    let indice = 0;
+    let pontuacao = 0;
+    let pulos = 2; // limite de pulos
+
+    const statusDiv = document.getElementById('status');
+    const scoreDiv = document.getElementById('score');
+    const imageElement = document.getElementById('fruitImage');
+    const micButton = document.getElementById('micButton');
+    const micImage = document.getElementById('micImage');
+    const pularButton = document.getElementById('pular');
+    const menuButton = document.getElementById('menu');
+    const pulosRestantes = document.getElementById('pulosRestantes');
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = false;
+
+    function mostrarFruta() {
+      const frutaAtual = frutas[indice];
+      imageElement.src = frutaAtual.imagem;
+      scoreDiv.textContent = `Fruta ${indice + 1} de ${frutas.length}`;
+      statusDiv.textContent = "Clique no microfone e diga o nome da fruta 🍓";
+    }
+
+    micButton.addEventListener('click', () => {
+      statusDiv.textContent = "🎙️ Ouvindo...";
+      micButton.classList.add("recording");
+      recognition.start();
+    });
+
+    recognition.onresult = (event) => {
+      micButton.classList.remove("recording");
+      const fala = event.results[0][0].transcript.toLowerCase().trim();
+      const frutaAtual = frutas[indice].nome.toLowerCase();
+
+      if (fala.includes(frutaAtual)) {
+        statusDiv.textContent = "✅ Correto!";
+        pontuacao++;
+        proximaFruta();
+      } else {
+        statusDiv.textContent = "❌ Tente novamente!";
+      }
+    };
+
+    function proximaFruta() {
+      if (indice < frutas.length - 1) {
+        indice++;
+        setTimeout(mostrarFruta, 1200);
+      } else {
+        setTimeout(() => {
+          imageElement.style.display = "none";
+          micButton.style.display = "none";
+          pularButton.style.display = "none";
+          statusDiv.textContent = (pulos === 2)
+            ? "🎉 Perfeito! Você acertou todas sem pular nenhuma! 👏"
+            : "🎉 Parabéns! Você terminou a fase!";
+          scoreDiv.textContent = `Pontuação final: ${pontuacao}/${frutas.length}`;
+          document.getElementById("pularInfo").style.display = "none";
+        }, 1200);
+      }
+    }
+
+    recognition.onerror = () => {
+      micButton.classList.remove("recording");
+      statusDiv.textContent = "Erro no microfone ou permissão negada.";
+    };
+
+    pularButton.addEventListener('click', () => {
+      if (pulos > 0) {
+        pulos--;
+        pulosRestantes.textContent = pulos;
+        statusDiv.textContent = "⏭️ Pulando fruta...";
+        proximaFruta();
+      } else {
+        statusDiv.textContent = "🚫 Você já usou todos os seus pulos!";
+        pularButton.disabled = true;
+        pularButton.style.backgroundColor = "#ccc";
+      }
+    });
+
+    menuButton.addEventListener('click', () => {
+      window.location.href = "../menu.html"; // ajuste conforme a estrutura do seu projeto
+    });
+
+    mostrarFruta();
+  </script>
+</body>
+</html>

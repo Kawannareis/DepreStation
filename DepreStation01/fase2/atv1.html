@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isso é uma silaba? </title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Press Start 2P', sans-serif;
+    margin:0;
+    padding:0;
+    background: black;
+    background-size: cover;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:#fff;
+    text-align:center;
+  }
+
+  h1 {
+    margin-bottom: 40px;
+  }
+
+  .bloco {
+    width:200px;
+    height:120px;
+    background:#4b4b4b;
+    border-radius:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:30px;
+    margin-bottom:20px;
+    animation: aparecer 0.5s ease;
+  }
+
+  @keyframes aparecer {
+    0% { transform: scale(0.5); opacity:0; }
+    100% { transform: scale(1); opacity:1; }
+  }
+
+  button {
+    width:100px;
+    padding:10px;
+    margin:0 15px;
+    font-size:16px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:#5c4dff;
+    color:#fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  button:hover {
+    transform: scale(1.1);
+    box-shadow:0 0 10px #a08fff;
+  }
+
+  .acertou { border: 3px solid #00ff00; }
+  .errou { border: 3px solid #ff0000; }
+
+  .feedback {
+    margin-top:20px;
+    height:20px;
+    font-size:14px;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>Isso é uma sílaba?</h1>
+<div id="bloco" class="bloco"></div>
+<div>
+  <button id="btnSim">Sim</button>
+  <button id="btnNao">Não</button>
+</div>
+<div class="feedback" id="feedback"></div>
+
+<audio id="somAcerto" src="ding.mp3"></audio>
+<audio id="somErro" src="bzz.mp3"></audio>
+
+<script>
+const pares = [
+  {texto:"BA", correto:true},
+  {texto:"BI", correto:true},
+  {texto:"ZX", correto:false},
+  {texto:"LA", correto:true},
+  {texto:"LD", correto:false},
+  {texto:"BE", correto:true}
+];
+
+let indice = 0;
+let acertos = 0;
+
+const bloco = document.getElementById('bloco');
+const feedback = document.getElementById('feedback');
+const somAcerto = document.getElementById('somAcerto');
+const somErro = document.getElementById('somErro');
+const btnSim = document.getElementById('btnSim');
+const btnNao = document.getElementById('btnNao');
+
+function mostrarBloco(){
+  if(indice >= pares.length){
+    // Verifica se usuário pode avançar
+    if(acertos >= Math.ceil(pares.length/2)){
+      feedback.textContent = "Parabéns! Próxima atividade desbloqueada!";
+      setTimeout(()=> window.location.href="atv2.html", 2000);
+    } else {
+      feedback.textContent = "Tente novamente para avançar!";
+    }
+    return;
+  }
+
+  const atual = pares[indice];
+  bloco.textContent = atual.texto;
+  bloco.className = 'bloco'; // reset
+  feedback.textContent = '';
+}
+
+// Função para responder
+function responder(sim){
+  const atual = pares[indice];
+  const certo = (sim && atual.correto) || (!sim && !atual.correto);
+  
+  if(certo){
+    bloco.classList.add('acertou');
+    somAcerto.play();
+    acertos++;
+  } else {
+    bloco.classList.add('errou');
+    somErro.play();
+  }
+
+  indice++;
+  setTimeout(mostrarBloco, 800);
+}
+
+btnSim.addEventListener('click', ()=>responder(true));
+btnNao.addEventListener('click', ()=>responder(false));
+
+// Inicializa
+mostrarBloco();
+</script>
+
+</body>
+</html>

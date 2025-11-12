@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fase 5 - Fale o Nome do Animal 🐾</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #a1ffe3, #b6c8ff);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      margin-top: 30px;
+      color: #1a5f7a;
+    }
+
+    #imagem-animal {
+      width: 220px;
+      height: 220px;
+      margin: 40px auto;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      object-fit: contain;
+      background-color: white;
+      display: block;
+    }
+
+    #resultado {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+      height: 30px;
+    }
+
+    button {
+      margin: 10px;
+      border: none;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #microfone {
+      background-color: #0077b6;
+      color: white;
+    }
+
+    #microfone:hover {
+      background-color: #00b4d8;
+    }
+
+    #pular {
+      background-color: #f4a261;
+      color: white;
+    }
+
+    #pular:hover {
+      background-color: #e76f51;
+    }
+
+    #menu {
+      background-color: #6d597a;
+      color: white;
+    }
+
+    #menu:hover {
+      background-color: #b56576;
+    }
+
+    #progresso {
+      margin-top: 15px;
+      font-size: 18px;
+      color: #1a5f7a;
+    }
+
+    #limite {
+      color: #e63946;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎤 Diga o nome do animal!</h1>
+
+  <img id="imagem-animal" src="img1/raposa.jpg" alt="Animal">
+
+  <div id="resultado"></div>
+
+  <button id="microfone">
+    <img src="microfone.png" alt="Falar" width="30">
+  </button>
+  <button id="pular">Pular</button>
+  <button id="menu">Menu</button>
+
+  <div id="progresso"></div>
+  <div id="limite"></div>
+
+  <script>
+    const animais = [
+      { nome: "raposa", imagem: "img1/raposa.jpg" },
+      { nome: "tartaruga", imagem: "img1/tartaruga.jpg" },
+      { nome: "galinha", imagem: "img1/galinha.jpg" },
+      { nome: "vaca", imagem: "img1/vaca.jpg" },
+      { nome: "esquilo", imagem: "img1/esquilo.jpg" },
+      { nome: "elefante", imagem: "img1/elefante.jpg" },
+      { nome: "pato", imagem: "img1/pato.jpg" },
+      { nome: "porco", imagem: "img1/porco.jpg" },
+      { nome: "coruja", imagem: "img1/coruja.jpg" },
+      { nome: "tucano", imagem: "img1/tucano.jpg" }
+    ];
+
+    let indiceAtual = 0;
+    let pulosRestantes = 2;
+
+    const imagem = document.getElementById('imagem-animal');
+    const resultado = document.getElementById('resultado');
+    const progresso = document.getElementById('progresso');
+    const limite = document.getElementById('limite');
+    const botaoFalar = document.getElementById('microfone');
+    const botaoPular = document.getElementById('pular');
+    const botaoMenu = document.getElementById('menu');
+
+    progresso.textContent = `Animal ${indiceAtual + 1} de ${animais.length}`;
+    limite.textContent = `Pulos restantes: ${pulosRestantes}`;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const reconhecimento = new SpeechRecognition();
+    reconhecimento.lang = "pt-BR";
+
+    botaoFalar.addEventListener("click", () => {
+      resultado.textContent = "🎧 Ouvindo...";
+      reconhecimento.start();
+    });
+
+    reconhecimento.onresult = (event) => {
+      const fala = event.results[0][0].transcript.toLowerCase().trim();
+      resultado.textContent = `Você disse: ${fala}`;
+
+      const animalCorreto = animais[indiceAtual].nome.toLowerCase();
+
+      if (fala.includes(animalCorreto)) {
+        resultado.textContent = "✅ Acertou!";
+        indiceAtual++;
+        mostrarProximo();
+      } else {
+        resultado.textContent = "❌ Tente novamente!";
+      }
+    };
+
+    reconhecimento.onerror = () => {
+      resultado.textContent = "⚠️ Erro ao reconhecer a fala. Tente novamente.";
+    };
+
+    botaoPular.addEventListener("click", () => {
+      if (pulosRestantes > 0) {
+        pulosRestantes--;
+        indiceAtual++;
+        mostrarProximo();
+        limite.textContent = `Pulos restantes: ${pulosRestantes}`;
+      } else {
+        limite.textContent = "❌ Você não pode mais pular!";
+      }
+    });
+
+    botaoMenu.addEventListener("click", () => {
+      window.location.href = "menu.html";
+    });
+
+    function mostrarProximo() {
+      if (indiceAtual < animais.length) {
+        setTimeout(() => {
+          imagem.src = animais[indiceAtual].imagem;
+          progresso.textContent = `Animal ${indiceAtual + 1} de ${animais.length}`;
+          resultado.textContent = "";
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          imagem.style.display = "none";
+          resultado.textContent = "🎉 Parabéns! Você acertou todos os animais!";
+          progresso.textContent = "";
+          botaoFalar.style.display = "none";
+          botaoPular.style.display = "none";
+          limite.textContent = "";
+        }, 1000);
+      }
+    }
+  </script>
+
+</body>
+</html>

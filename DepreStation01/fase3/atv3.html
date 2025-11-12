@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase 3 - Atividade 3 | Formando Palavras</title>
+<style>
+body {
+  font-family: 'Press Start 2P', sans-serif;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  color: #a08fff;
+  font-size: 18px;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px #000;
+}
+
+#emoji {
+  font-size: 70px;
+  margin: 20px 0;
+}
+
+#progresso {
+  font-size: 12px;
+  color: #c5b8ff;
+  margin-bottom: 20px;
+}
+
+#sylContainer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px;
+}
+
+.syl {
+  background: #4b4b4b;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 2px solid #5c4dff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.syl:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px #8b7dff;
+  background: #5c4dff;
+}
+
+#resposta {
+  background: #1e1e1e;
+  border: 2px dashed #5c4dff;
+  border-radius: 8px;
+  padding: 10px;
+  width: 220px;
+  margin: 15px auto;
+  font-size: 14px;
+  min-height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#mensagem {
+  font-size: 12px;
+  margin-top: 10px;
+  color: #a08fff;
+  min-height: 20px;
+}
+
+#btnAvancar {
+  display: none;
+  margin-top: 25px;
+  background: #5c4dff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 10px;
+  cursor: pointer;
+  animation: glow 2s infinite alternate;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#btnAvancar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px #a08fff;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 5px #5c4dff; }
+  to { box-shadow: 0 0 15px #a08fff; }
+}
+
+</style>
+</head>
+<body>
+  <h1>🔤 Monte a Palavra Correta!</h1>
+  <div id="emoji">🍎</div>
+  <div id="progresso">Palavra 1 de 5</div>
+  <div id="sylContainer"></div>
+  <div id="resposta"></div>
+  <div id="mensagem"></div>
+  <button id="btnAvancar">👉 Próxima Palavra</button>
+
+<script>
+  const palavras = [
+    { emoji: "🍎", palavra: "MAÇÃ", silabas: ["MA", "ÇÃ"] },
+    { emoji: "🏠", palavra: "CASA", silabas: ["CA", "SA"] },
+    { emoji: "🐶", palavra: "CACHORRO", silabas: ["CA", "CHO", "RRO"] },
+    { emoji: "🦋", palavra: "BORBOLETA", silabas: ["BOR", "BO", "LE", "TA"] },
+    { emoji: "🚗", palavra: "CARRO", silabas: ["CAR", "RO"] }
+  ];
+
+  let indice = 0;
+  let resposta = "";
+
+  const emojiEl = document.getElementById("emoji");
+  const container = document.getElementById("sylContainer");
+  const respostaEl = document.getElementById("resposta");
+  const mensagemEl = document.getElementById("mensagem");
+  const btnAvancar = document.getElementById("btnAvancar");
+  const progresso = document.getElementById("progresso");
+
+  function embaralhar(array){
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  function carregarPalavra(){
+    const atual = palavras[indice];
+    resposta = "";
+    respostaEl.textContent = "";
+    mensagemEl.textContent = "";
+    btnAvancar.style.display = "none";
+
+    emojiEl.textContent = atual.emoji;
+    progresso.textContent = `Palavra ${indice + 1} de ${palavras.length}`;
+    
+    container.innerHTML = "";
+    embaralhar(atual.silabas).forEach(silaba => {
+      const div = document.createElement("div");
+      div.className = "syl";
+      div.textContent = silaba;
+      div.addEventListener("click", () => selecionarSilaba(silaba, div));
+      container.appendChild(div);
+    });
+  }
+
+  function selecionarSilaba(silaba, elemento){
+    resposta += silaba;
+    respostaEl.textContent = resposta;
+    elemento.style.visibility = "hidden";
+
+    const palavraCerta = palavras[indice].palavra;
+    if(resposta.length >= palavraCerta.length){
+      if(resposta === palavraCerta){
+        mensagemEl.textContent = "🎉 Muito bem!";
+        new Audio("../sons/acerto.mp3").play();
+        btnAvancar.style.display = "inline-block";
+      } else {
+        mensagemEl.textContent = "❌ Tente novamente!";
+        new Audio("../sons/erro.mp3").play();
+        resposta = "";
+        respostaEl.textContent = "";
+        document.querySelectorAll(".syl").forEach(e => e.style.visibility = "visible");
+      }
+    }
+  }
+
+  btnAvancar.addEventListener("click", ()=>{
+    indice++;
+    if(indice < palavras.length){
+      carregarPalavra();
+    } else {
+      alert("Parabéns! Você completou todas as palavras!");
+      window.location.href = "../inicio.html";
+    }
+  });
+
+  carregarPalavra();
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fase 7 - Cobrinha das Letras</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    canvas {
+      background-color: #111;
+      border: 2px solid #fff;
+    }
+
+    #wordDisplay {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    #currentWord {
+      color: #9b59b6; /* Roxo */
+    }
+
+    #popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid white;
+      padding: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-family: 'Press Start 2P', cursive;
+      cursor: pointer;
+      background: #9b59b6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #8e44ad;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐍 Fase 7: Cobrinha das Letras</h1>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <div id="wordDisplay">
+    Palavra: <span id="targetWord">---</span><br />
+    Formando: <span id="currentWord"></span>
+  </div>
+
+  <div id="popup">
+    <p id="popupText"></p>
+    <button id="restartBtn">Sim</button>
+    <button id="menuBtn">Não</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const box = 20;
+    let snake = [{ x: 9 * box, y: 10 * box }];
+    let direction = null;
+    let gameStarted = false;
+    let letters = [];
+    let targetWords = ["CASA", "UVA", "MESA", "BOLA", "OVO"];
+    let currentWordIndex = 0;
+    let targetWord = targetWords[currentWordIndex];
+    let formedWord = "";
+
+    const popup = document.getElementById("popup");
+    const popupText = document.getElementById("popupText");
+    const restartBtn = document.getElementById("restartBtn");
+    const menuBtn = document.getElementById("menuBtn");
+
+    document.getElementById("targetWord").textContent = targetWord;
+
+    // Gera letras aleatórias
+    function generateLetters() {
+      letters = [];
+      const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      for (let i = 0; i < 10; i++) {
+        let randomLetter = allLetters[Math.floor(Math.random() * allLetters.length)];
+        let position = {
+          x: Math.floor(Math.random() * (canvas.width / box)) * box,
+          y: Math.floor(Math.random() * (canvas.height / box)) * box,
+          letter: randomLetter
+        };
+        letters.push(position);
+      }
+      // Garante que as letras certas também estejam no tabuleiro
+      for (let ch of targetWord) {
+        let pos = {
+          x: Math.floor(Math.random() * (canvas.width / box)) * box,
+          y: Math.floor(Math.random() * (canvas.height / box)) * box,
+          letter: ch
+        };
+        letters.push(pos);
+      }
+    }
+
+    generateLetters();
+
+    document.addEventListener("keydown", event => {
+      if (!gameStarted) gameStarted = true;
+
+      if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+      else if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+      else if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+      else if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+    });
+
+    function showPopup(text) {
+      popupText.textContent = text;
+      popup.style.display = "block";
+    }
+
+    restartBtn.onclick = () => {
+      popup.style.display = "none";
+      resetGame();
+    };
+
+    menuBtn.onclick = () => {
+      alert("Voltando ao menu...");
+      window.location.href = "menu.html";
+    };
+
+    function resetGame() {
+      snake = [{ x: 9 * box, y: 10 * box }];
+      direction = null;
+      gameStarted = false;
+      formedWord = "";
+      document.getElementById("currentWord").textContent = "";
+      generateLetters();
+    }
+
+    function drawSnake() {
+      for (let i = 0; i < snake.length; i++) {
+        ctx.beginPath();
+        ctx.arc(snake[i].x + box / 2, snake[i].y + box / 2, box / 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = i === 0 ? "#bf6bff" : "#9b59b6"; // Cabeça mais clara
+        ctx.fill();
+        ctx.closePath();
+
+        // Conexão entre segmentos (para parecer uma cobra contínua)
+        if (i > 0) {
+          ctx.beginPath();
+          ctx.moveTo(snake[i].x + box / 2, snake[i].y + box / 2);
+          ctx.lineTo(snake[i - 1].x + box / 2, snake[i - 1].y + box / 2);
+          ctx.strokeStyle = "#9b59b6";
+          ctx.lineWidth = 10;
+          ctx.stroke();
+          ctx.closePath();
+        }
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Desenha a cobrinha
+      drawSnake();
+
+      // Desenha as letras
+      ctx.fillStyle = "white";
+      ctx.font = "16px 'Press Start 2P'";
+      letters.forEach(l => {
+        ctx.fillText(l.letter, l.x + 3, l.y + 17);
+      });
+
+      if (gameStarted && direction) move();
+    }
+
+    function move() {
+      let headX = snake[0].x;
+      let headY = snake[0].y;
+
+      if (direction === "LEFT") headX -= box;
+      if (direction === "UP") headY -= box;
+      if (direction === "RIGHT") headX += box;
+      if (direction === "DOWN") headY += box;
+
+      if (headX < 0 || headY < 0 || headX >= canvas.width || headY >= canvas.height) {
+        showPopup("Você errou! Deseja recomeçar?");
+        return;
+      }
+
+      for (let i = 0; i < snake.length; i++) {
+        if (headX === snake[i].x && headY === snake[i].y) {
+          showPopup("Você errou! Deseja recomeçar?");
+          return;
+        }
+      }
+
+      // Verifica se comeu alguma letra
+      let ateLetra = false;
+      for (let i = 0; i < letters.length; i++) {
+        if (headX === letters[i].x && headY === letters[i].y) {
+          ateLetra = true;
+          const letraComida = letters[i].letter;
+          formedWord += letraComida;
+          document.getElementById("currentWord").textContent = formedWord;
+          letters.splice(i, 1);
+
+          if (!targetWord.startsWith(formedWord)) {
+            showPopup("Você errou! Deseja recomeçar?");
+            return;
+          }
+
+          if (formedWord === targetWord) {
+            currentWordIndex++;
+            if (currentWordIndex < targetWords.length) {
+              targetWord = targetWords[currentWordIndex];
+              document.getElementById("targetWord").textContent = targetWord;
+              formedWord = "";
+              document.getElementById("currentWord").textContent = "";
+              generateLetters();
+              return;
+            } else {
+              showPopup("Parabéns! Você concluiu todas as palavras!");
+              return;
+            }
+          }
+          break;
+        }
+      }
+
+      const newHead = { x: headX, y: headY };
+      snake.unshift(newHead);
+      if (!ateLetra) snake.pop();
+    }
+
+    setInterval(draw, 200);
+  </script>
+</body>
+</html>

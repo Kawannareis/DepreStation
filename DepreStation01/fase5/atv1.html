@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase 5 – Quiz de Revisão</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;
+    --text:#fff;
+    --btn:#6b3df7;
+    --btn-hover:#5c2dd0;
+    --correct:#22cc55;
+    --wrong:#ff3c3c;
+  }
+  html, body{
+    margin:0;
+    padding:0;
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Press Start 2P', monospace;
+  }
+  .container{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    box-sizing:border-box;
+  }
+  h1{
+    font-size:16px;
+    color:#ffcc00;
+    margin-bottom:20px;
+    text-align:center;
+  }
+  .question{
+    font-size:12px;
+    margin-bottom:16px;
+    text-align:center;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .options button{
+    background:var(--btn);
+    color:#fff;
+    border:none;
+    padding:12px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background 0.2s;
+    font-family:'Press Start 2P', monospace;
+    font-size:11px;
+  }
+  .options button:hover:not(.disabled){
+    background:var(--btn-hover);
+  }
+  .options button.disabled{
+    pointer-events:none;
+    opacity:0.6;
+  }
+  .feedback{
+    font-size:11px;
+    margin-bottom:10px;
+    height:16px;
+    text-align:center;
+  }
+  .score{
+    font-size:12px;
+    margin-top:12px;
+    text-align:center;
+  }
+  .nextBtn, .restartBtn{
+    background:var(--btn);
+    color:#fff;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-family:'Press Start 2P', monospace;
+    font-size:11px;
+    margin-top:12px;
+    transition:background 0.2s;
+  }
+  .nextBtn:hover, .restartBtn:hover{
+    background:var(--btn-hover);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Quiz de Revisão</h1>
+  <div class="question"></div>
+  <div class="options"></div>
+  <div class="feedback"></div>
+  <button class="nextBtn" style="display:none;">Próxima</button>
+  <div class="score"></div>
+  <button class="restartBtn" style="display:none;">Menu</button>
+</div>
+
+<script>
+const quiz = [
+  {q:"O que é uma sílaba?", o:["Uma letra isolada","Um som ou conjunto de sons","Uma palavra inteira"], a:1},
+  {q:"Qual destas palavras tem 2 sílabas?", o:["Banana","Pera","Abacaxi"], a:1},
+  {q:"Qual palavra é formada pelas sílabas 'BA-NA-NA'?", o:["Banana","Abacaxi","Manga"], a:0},
+  {q:"Qual palavra está escrita corretamente?", o:["MANGA","MANGA","MANGAA"], a:0},
+  {q:"Qual destas palavras é um objeto?", o:["Mesa","Cachorro","Uva"], a:0},
+  {q:"Qual destas palavras é uma fruta?", o:["Bola","Pera","Cama"], a:1},
+  {q:"Qual letra indica uma exclamação?", o:["!","?","."], a:0},
+  {q:"Qual letra indica uma pergunta?", o:["!","?","."], a:1},
+  {q:"Qual palavra tem 3 sílabas?", o:["Mesa","Banana","Bola"], a:1},
+  {q:"Qual destas palavras não é um animal?", o:["Leão","Urso","Mesa"], a:2}
+];
+
+let current = 0;
+let score = 0;
+
+const questionEl = document.querySelector(".question");
+const optionsEl = document.querySelector(".options");
+const feedbackEl = document.querySelector(".feedback");
+const nextBtn = document.querySelector(".nextBtn");
+const scoreEl = document.querySelector(".score");
+const restartBtn = document.querySelector(".restartBtn");
+
+function showQuestion(){
+  const q = quiz[current];
+  questionEl.textContent = q.q;
+  optionsEl.innerHTML = "";
+  feedbackEl.textContent = "";
+  nextBtn.style.display = "none";
+  q.o.forEach((opt,i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.addEventListener("click", ()=>checkAnswer(i));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function checkAnswer(i){
+  const q = quiz[current];
+  const buttons = optionsEl.querySelectorAll("button");
+  buttons.forEach(btn => btn.classList.add("disabled"));
+  if(i===q.a){
+    feedbackEl.textContent = "✅ Correto!";
+    buttons[i].style.backgroundColor = "#22cc55";
+    score++;
+  } else {
+    feedbackEl.textContent = "❌ Errado! Resposta: " + q.o[q.a];
+    buttons[i].style.backgroundColor = "#ff3c3c";
+    buttons[q.a].style.backgroundColor = "#22cc55";
+  }
+  nextBtn.style.display = "inline-block";
+}
+
+nextBtn.addEventListener("click", ()=>{
+  current++;
+  if(current < quiz.length){
+    showQuestion();
+  } else {
+    showScore();
+  }
+});
+
+function showScore(){
+  questionEl.textContent = "🎉 Quiz finalizado!";
+  optionsEl.innerHTML = "";
+  feedbackEl.textContent = "";
+  nextBtn.style.display = "none";
+  scoreEl.textContent = `Você acertou ${score} de ${quiz.length} perguntas!`;
+  restartBtn.style.display = "inline-block";
+}
+
+restartBtn.addEventListener("click", ()=>{
+  window.location.href = "inicio.html"; // ajuste para a tela de menu
+});
+
+showQuestion();
+</script>
+</body>
+</html>

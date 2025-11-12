@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Caça-Palavras - Objetos (10x10)</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000;
+    --cell:#222;
+    --selected:#6b3df7;
+    --found:#22cc55;
+    --hint:#ffc857;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Press Start 2P',monospace}
+  .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;box-sizing:border-box}
+  h1{font-size:16px;color:#ffcc00;margin:0}
+  p.leadin{font-size:11px;color:#bbb;margin:0}
+  #wordSearch{
+    display:grid;
+    grid-template-columns:repeat(10,44px);
+    grid-auto-rows:44px;
+    gap:6px;
+    margin-top:14px;
+  }
+  .cell{
+    width:44px;height:44px;border-radius:6px;background:var(--cell);
+    display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer;
+    font-weight:800;transition:background .12s, transform .08s;
+  }
+  .cell.selected{background:var(--selected); color:#000}
+  .cell.correct{background:var(--found); color:#000; pointer-events:none}
+  .cell.hint{background:var(--hint); color:#000}
+  #words{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;font-size:11px;max-width:92%}
+  .word{background:#333;padding:6px 10px;border-radius:8px}
+  .word.found{background:var(--found);color:#000;text-decoration:line-through}
+  #helpButton{position:fixed;right:18px;bottom:18px;background:#5c4dff;border:none;color:#fff;padding:10px 12px;border-radius:10px;cursor:pointer}
+  #helpButton.disabled{opacity:.35;pointer-events:none}
+  .footer{font-size:10px;color:#999;margin-top:6px}
+  @media (max-width:520px){
+    #wordSearch{grid-template-columns:repeat(10,32px);grid-auto-rows:32px;gap:5px}
+    .cell{width:32px;height:32px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Caça-palavras - Objetos">
+    <h1>🔍 Caça-Palavras — Objetos</h1>
+    <p class="leadin">Arraste (clicando) sobre as letras para selecionar a palavra. Use a ajuda 2x por jogo.</p>
+    <div id="wordSearch" aria-label="Tabuleiro"></div>
+    <div id="words" aria-live="polite"></div>
+    <div class="footer">Ao encontrar todas as palavras você será levado para a próxima atividade.</div>
+  </div>
+
+  <button id="helpButton">❓ Ajuda (2)</button>
+
+  <!-- sons de teste; troque pelos seus arquivos locais se quiser -->
+  <audio id="soundOk" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0b97b94f85.mp3?filename=success-1-6297.mp3"></audio>
+  <audio id="soundErr" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_49b9c08e4a.mp3?filename=error-126627.mp3"></audio>
+
+<script>
+/* CONFIG */
+const SIZE = 10;
+const WORDS = ["MESA","CAMA","CADEIRA","LIVRO","BOLA","BOLSA", "COPO", "FOGAO"]; // palavras (maiúsculas)
+const MAX_HELP = 3;
+const HINT_MS = 3000;
+
+/* ESTADO */
+let grid = Array.from({length: SIZE*SIZE }, ()=>null);
+let wordPositions = {}; // {WORD: [indices]}
+let found = new Set();
+let selected = [];
+let isSelecting = false;
+let helpUses = 0;
+
+/* ELEMENTOS */
+const boardEl = document.getElementById('wordSearch');
+const wordsEl = document.getElementById('words');
+const helpBtn = document.getElementById('helpButton');
+const soundOk = document.getElementById('soundOk');
+const soundErr = document.getElementById('soundErr');
+
+/* UTIL */
+function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
+function idx(r,c){ return r*SIZE + c; }
+function coords(i){ return [Math.floor(i/SIZE), i % SIZE]; }
+
+/* DIREÇÕES (permitimos H, V e diagonais opcionalmente se quiser mais tarde) */
+const DIRS = [
+  [0,1],[1,0],[0,-1],[-1,0],
+  [1,1],[1,-1],[-1,1],[-1,-1]
+];
+
+/* tenta posicionar palavra em uma direção aleatória (horizontal/vertical/diagonal) */
+function placeWord(word){
+  for(let attempt=0; attempt<600; attempt++){
+    const dir = DIRS[Math.floor(Math.random()*DIRS.length)];
+    const r0 = Math.floor(Math.random()*SIZE);
+    const c0 = Math.floor(Math.random()*SIZE);
+    const pos = [];
+    let ok = true;
+    for(let k=0;k<word.length;k++){
+      const r = r0 + dir[0]*k;
+      const c = c0 + dir[1]*k;
+      if(r<0 || c<0 || r>=SIZE || c>=SIZE){ ok=false; break; }
+      const i = idx(r,c);
+      if(grid[i] && grid[i] !== word[k]){ ok=false; break; }
+      pos.push(i);
+    }
+    if(!ok) continue;
+    pos.forEach((i,k)=> grid[i] = word[k]);
+    wordPositions[word] = pos;
+    return true;
+  }
+  console.warn('Não foi possível posicionar', word);
+  return false;
+}
+
+/* build grid */
+function build(){
+  // limpar
+  grid = Array.from({length: SIZE*SIZE}, ()=>null);
+  wordPositions = {};
+  // posicionar palavras
+  for(const w of WORDS) placeWord(w);
+  // preencher resto com letras aleatórias
+  const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for(let i=0;i<grid.length;i++) if(!grid[i]) grid[i] = ABC[Math.floor(Math.random()*ABC.length)];
+  render();
+}
+
+/* render */
+function render(){
+  boardEl.innerHTML = '';
+  for(let i=0;i<grid.length;i++){
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.textContent = grid[i];
+    div.dataset.i = i;
+    boardEl.appendChild(div);
+  }
+  wordsEl.innerHTML = '';
+  for(const w of WORDS){
+    const s = document.createElement('div');
+    s.className = 'word';
+    s.textContent = w;
+    s.dataset.word = w;
+    if(found.has(w)) s.classList.add('found');
+    wordsEl.appendChild(s);
+  }
+}
+
+/* seleção por arrastar - mouse */
+boardEl.addEventListener('mousedown', e=>{
+  if(!e.target.classList.contains('cell')) return;
+  isSelecting = true;
+  selected = [e.target];
+  e.target.classList.add('selected');
+});
+boardEl.addEventListener('mouseover', e=>{
+  if(!isSelecting) return;
+  if(e.target.classList && e.target.classList.contains('cell') && !selected.includes(e.target)){
+    selected.push(e.target);
+    e.target.classList.add('selected');
+  }
+});
+window.addEventListener('mouseup', ()=>{
+  if(!isSelecting) return;
+  isSelecting = false;
+  if(selected.length === 0) return;
+  const str = selected.map(d => d.textContent).join('');
+  const rev = selected.map(d => d.textContent).reverse().join('');
+  let matched = null;
+  for(const w of WORDS){
+    if(found.has(w)) continue;
+    if(w === str || w === rev){ matched = w; break; }
+  }
+  if(matched){
+    // marca células corretas (pela posição conhecida) e a palavra na lista
+    const pos = wordPositions[matched] || [];
+    pos.forEach(i=>{
+      const cell = boardEl.querySelector(`.cell[data-i="${i}"]`);
+      if(cell){ cell.classList.add('correct'); cell.classList.remove('selected'); cell.style.pointerEvents='none'; }
+    });
+    const span = wordsEl.querySelector(`.word[data-word="${matched}"]`);
+    if(span) span.classList.add('found');
+    found.add(matched);
+    try{ soundOk.currentTime = 0; soundOk.play(); }catch(e){}
+  } else {
+    // erro: limpa seleção visual
+    selected.forEach(c => c.classList.remove('selected'));
+    try{ soundErr.currentTime = 0; soundErr.play(); }catch(e){}
+  }
+  selected = [];
+  // finalizou?
+  if(found.size === WORDS.length){
+    setTimeout(()=> {
+      alert('Parabéns! Você completou os objetos! 🎉');
+      window.location.href = 'menu.html'; // ajuste para sua rota final
+    },700);
+  }
+});
+
+/* touch support (simula arrastar) */
+boardEl.addEventListener('touchstart', e=>{
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if(el && el.classList.contains('cell')){
+    isSelecting = true; selected = [el]; el.classList.add('selected');
+  }
+}, {passive:true});
+boardEl.addEventListener('touchmove', e=>{
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if(isSelecting && el && el.classList.contains('cell') && !selected.includes(el)){
+    selected.push(el); el.classList.add('selected');
+  }
+}, {passive:true});
+boardEl.addEventListener('touchend', e=>{
+  if(isSelecting){
+    isSelecting = false;
+    // repetir lógica de mouseup
+    const str = selected.map(d => d.textContent).join('');
+    const rev = selected.map(d => d.textContent).reverse().join('');
+    let matched=null;
+    for(const w of WORDS){ if(found.has(w)) continue; if(w===str||w===rev){ matched=w; break; } }
+    if(matched){
+      const pos = wordPositions[matched]||[];
+      pos.forEach(i=>{ const cell = boardEl.querySelector(`.cell[data-i="${i}"]`); if(cell){ cell.classList.add('correct'); cell.classList.remove('selected'); cell.style.pointerEvents='none'; } });
+      const span = wordsEl.querySelector(`.word[data-word="${matched}"]`); if(span) span.classList.add('found');
+      found.add(matched);
+      try{ soundOk.currentTime=0; soundOk.play(); }catch(e){}
+    } else {
+      selected.forEach(c=>c.classList.remove('selected'));
+      try{ soundErr.currentTime=0; soundErr.play(); }catch(e){}
+    }
+    selected = [];
+    if(found.size === WORDS.length){
+      setTimeout(()=> { alert('Parabéns! Você completou os objetos! 🎉'); window.location.href='menu.html'; },700);
+    }
+  }
+}, {passive:true});
+
+/* AJUDA: destaca uma palavra restante por 3s (2 usos) */
+helpBtn.addEventListener('click', ()=>{
+  if(helpUses >= MAX_HELP) return;
+  const remaining = WORDS.filter(w => !found.has(w));
+  if(remaining.length === 0) return;
+  helpUses++;
+  helpBtn.textContent = `❓ Ajuda (${MAX_HELP - helpUses})`;
+  if(helpUses >= MAX_HELP) helpBtn.classList.add('disabled');
+
+  const chosen = remaining[Math.floor(Math.random()*remaining.length)];
+  const pos = wordPositions[chosen] || [];
+  pos.forEach(i=>{
+    const cell = boardEl.querySelector(`.cell[data-i="${i}"]`);
+    if(cell) cell.classList.add('hint');
+  });
+  setTimeout(()=> pos.forEach(i=>{
+    const cell = boardEl.querySelector(`.cell[data-i="${i}"]`);
+    if(cell) cell.classList.remove('hint');
+  }), HINT_MS);
+});
+
+/* inicializa */
+build();
+</script>
+</body>
+</html>
